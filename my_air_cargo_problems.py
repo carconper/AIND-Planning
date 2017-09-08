@@ -61,6 +61,19 @@ class AirCargoProblem(Problem):
             """
             loads = []
             # TODO create all load ground actions from the domain Load action
+            for c in self.cargos:
+                for a in self.airports:
+                    for p in self.planes:
+                        precond_pos = [expr("At({}, {})".format(c, a)),
+                                       expr("At({}, {})".format(p, a)),
+                                       ]
+                        precond_neg = []
+                        effect_add = [expr("In({}, {})".format(c, p))]
+                        effect_rem = [expr("At({}, {})".format(c, a))]
+                        load = Action(expr("Load({}, {}, {})".format(c, p, a)),
+                                      [precond_pos, precond_neg],
+                                      [effect_add, effect_rem])
+                        loads.append(load)
             return loads
 
         def unload_actions():
@@ -70,6 +83,19 @@ class AirCargoProblem(Problem):
             """
             unloads = []
             # TODO create all Unload ground actions from the domain Unload action
+            for c in self.cargos:
+                for a in self.airports:
+                    for p in self.planes:
+                        precond_pos = [expr("In({}, {})".format(c, p)),
+                                       expr("At({}, {})".format(p, a)),
+                                       ]
+                        precond_neg = []
+                        effect_add = [expr("At({}, {})".format(c, a))]
+                        effect_rem = [expr("In({}, {})".format(c, p))]
+                        load = Action(expr("Unload({}, {}, {})".format(c, p, a)),
+                                      [precond_pos, precond_neg],
+                                      [effect_add, effect_rem])
+                        unloads.append(load)
             return unloads
 
         def fly_actions():
@@ -105,6 +131,30 @@ class AirCargoProblem(Problem):
         """
         # TODO implement
         possible_actions = []
+        #print("State:", state)
+        decoded = decode_state(state, self.state_map)
+        #print("Decoded:", decoded)
+        kb = PropKB()
+        kb.tell(decoded.pos_sentence())
+        #print("Clauses:", kb.clauses)
+        for action in self.actions_list:
+            is_possible = True
+            #print("Action {} | precond_pos {}".format(action, action.precond_pos))
+            for clause in action.precond_pos:
+                #print("Clause {}".format(clause))
+                if clause not in kb.clauses:
+                    is_possible = False
+                    break
+            if is_possible:
+                for clause in action.precond_neg:
+                    #print("Clause {}".format(clause))
+                    if clause in kb.clauses:
+                        is_possible = False
+                        break
+            if is_possible:
+                possible_actions.append(action)
+                #print("Found possible action! {}".format(action))
+        #print("POssible Actions: {}".format(possible_actions))
         return possible_actions
 
     def result(self, state: str, action: Action):
@@ -195,3 +245,8 @@ def air_cargo_p2() -> AirCargoProblem:
 def air_cargo_p3() -> AirCargoProblem:
     # TODO implement Problem 3 definition
     pass
+
+
+if __name__ == "__main__":
+    acp = air_cargo_p1()
+    acp.actions(acp.initial_state_TF)
