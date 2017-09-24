@@ -361,8 +361,10 @@ def compare_searchers(problems, header,
                                  depth_limited_search,
                                  recursive_best_first_search]):
     def do(searcher, problem):
+        print("Running {} for {}".format(searcher, problem))
         p = InstrumentedProblem(problem)
         searcher(p)
         return p
     table = [[name(s)] + [do(s, p) for p in problems] for s in searchers]
+    print(table)
     print_table(table, header)

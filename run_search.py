@@ -4,7 +4,7 @@ from aimacode.search import InstrumentedProblem
 from aimacode.search import (breadth_first_search, astar_search,
     breadth_first_tree_search, depth_first_graph_search, uniform_cost_search,
     greedy_best_first_graph_search, depth_limited_search,
-    recursive_best_first_search)
+    recursive_best_first_search, compare_searchers, iterative_deepening_search)
 from my_air_cargo_problems import air_cargo_p1, air_cargo_p2, air_cargo_p3
 
 PROBLEM_CHOICE_MSG = """
@@ -84,8 +84,18 @@ def manual():
                                                " ".join(p_choices),
                                                " ".join(s_choices)))
 
+def compare():
+    print("Comparative")
+    #print(PROBLEMS)
+    #print(SEARCHES)
+    #main(['1', '2', '3'], ['1', '2', '3', '4', '5'])
+    compare_searchers([air_cargo_p1(), air_cargo_p2(), air_cargo_p3()],
+                     ["ACP1", "ACP2", "ACP3"],
+                    [breadth_first_search, depth_first_graph_search,])
+
 
 def main(p_choices, s_choices):
+    print(p_choices, s_choices)
 
     problems = [PROBLEMS[i-1] for i in map(int, p_choices)]
     searches = [SEARCHES[i-1] for i in map(int, s_choices)]
@@ -112,6 +122,8 @@ if __name__=="__main__":
         "and informed heuristic search.")
     parser.add_argument('-m', '--manual', action="store_true",
                         help="Interactively select the problems and searches to run.")
+    parser.add_argument('-c', '--compare', action="store_true",
+                        help="Interactively select the problems and searches to run.")
     parser.add_argument('-p', '--problems', nargs="+", choices=range(1, len(PROBLEMS)+1), type=int, metavar='',
                         help="Specify the indices of the problems to solve as a list of space separated values. Choose from: {!s}".format(list(range(1, len(PROBLEMS)+1))))
     parser.add_argument('-s', '--searches', nargs="+", choices=range(1, len(SEARCHES)+1), type=int, metavar='',
@@ -122,6 +134,8 @@ if __name__=="__main__":
         manual()
     elif args.problems and args.searches:
         main(list(sorted(set(args.problems))), list(sorted(set((args.searches)))))
+    elif args.compare:
+        compare()
     else:
         print()
         parser.print_help()
